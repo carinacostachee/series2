@@ -13,8 +13,9 @@ import util::Math;
 import Metrics::Helpers;
 
 // Configuration
-int MIN_CLONE_SIZE = 6; // minimum number of statements
-int MIN_MASS = 50; // minimum token count
+// Configuration
+int MIN_CLONE_SIZE = 3; // Lowered from 6 to catch small test methods
+int MIN_MASS = 10;      // Lowered from 50 to catch small test methods
 
 // Data structures for clone detection
 alias CloneFragment = tuple[node subtree, loc location, int mass];
@@ -98,14 +99,12 @@ bool isCloneCandidate(node n) {
     return size([stmt | /Statement stmt := n]) >= MIN_CLONE_SIZE;
 }
 
-// Calculate the mass (token count) of a subtree
+// Calculate the mass (node count) of a subtree
 int calculateMass(node n) {
     int mass = 0;
+    // Count every node in the tree (statements, expressions, literals, etc.)
     visit(n) {
-        case str _: mass += 1;
-        case int _: mass += 1;
-        case real _: mass += 1;
-        case bool _: mass += 1;
+        case node _ : mass += 1;
     }
     return mass;
 }
