@@ -1,0 +1,686 @@
+=== Clone Detection Results ===
+Number of clone classes: 22
+Total number of clones: 46
+
+Clone Class 1: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/RowAction.java|(24214,477,<818,20>,<827,21>)
+  Lines: 818-827
+  Mass: 217 tokens
+  Code snippet:
+                        if (mode == TransactionManager.ACTION_READ) {
+                            actionType = action.ACTION_DELETE;
+                        } else if (mode == TransactionManager.ACTION_DUP) {
+                            actionType = ACTION_INSERT;
+    
+                            session.tempSet.clear();
+                            session.tempSet.add(action);
+                        } else if (mode == TransactionManager.ACTION_REF) {
+                            actionType = ACTION_DELETE;
+                        }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/RowAction.java|(25481,477,<850,20>,<859,21>)
+  Lines: 850-859
+  Mass: 217 tokens
+  Code snippet:
+                        if (mode == TransactionManager.ACTION_READ) {
+                            actionType = action.ACTION_DELETE;
+                        } else if (mode == TransactionManager.ACTION_DUP) {
+                            actionType = ACTION_INSERT;
+    
+                            session.tempSet.clear();
+                            session.tempSet.add(action);
+                        } else if (mode == TransactionManager.ACTION_REF) {
+                            actionType = ACTION_DELETE;
+                        }
+
+---
+
+Clone Class 2: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserDDL.java|(77522,399,<2482,51>,<2492,25>)
+  Lines: 2482-2492
+  Mass: 96 tokens
+  Code snippet:
+                            if (database.sqlSyntaxMys) {
+                                read();
+    
+                                isIdentity   = true;
+                                isPKIdentity = true;
+                                typeObject   = Type.SQL_BIGINT;
+                                sequence = new NumberSequence(null, 1, 1,
+                                                              typeObject);
+    
+                                break;
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserDDL.java|(78432,399,<2503,51>,<2513,25>)
+  Lines: 2503-2513
+  Mass: 96 tokens
+  Code snippet:
+                            if (database.sqlSyntaxPgs) {
+                                read();
+    
+                                isIdentity   = true;
+                                isPKIdentity = true;
+                                typeObject   = Type.SQL_BIGINT;
+                                sequence = new NumberSequence(null, 1, 1,
+                                                              typeObject);
+    
+                                break;
+
+---
+
+Clone Class 3: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ExpressionLogical.java|(28853,448,<923,69>,<933,17>)
+  Lines: 923-933
+  Mass: 178 tokens
+  Code snippet:
+                               || nodes[RIGHT].dataType.isBooleanType()) {
+                        if (session.database.sqlEnforceTypes) {
+                            throw Error.error(ErrorCode.X_42562);
+                        }
+    
+                        if (nodes[RIGHT].dataType.canConvertFrom(
+                                nodes[LEFT].dataType)) {
+                            nodes[LEFT] = ExpressionOp.getCastExpression(session,
+                                    nodes[LEFT], nodes[RIGHT].dataType);
+                        }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ExpressionLogical.java|(29845,448,<943,65>,<953,17>)
+  Lines: 943-953
+  Mass: 178 tokens
+  Code snippet:
+                    } else if (nodes[RIGHT].dataType.isNumberType()) {
+                        if (session.database.sqlEnforceTypes) {
+                            throw Error.error(ErrorCode.X_42562);
+                        }
+    
+                        if (nodes[RIGHT].dataType.canConvertFrom(
+                                nodes[LEFT].dataType)) {
+                            nodes[LEFT] = ExpressionOp.getCastExpression(session,
+                                    nodes[LEFT], nodes[RIGHT].dataType);
+                        }
+
+---
+
+Clone Class 4: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ExpressionLogical.java|(29348,449,<933,64>,<943,17>)
+  Lines: 933-943
+  Mass: 179 tokens
+  Code snippet:
+                    } else if (nodes[LEFT].dataType.isNumberType()) {
+                        if (session.database.sqlEnforceTypes) {
+                            throw Error.error(ErrorCode.X_42562);
+                        }
+    
+                        if (nodes[LEFT].dataType.canConvertFrom(
+                                nodes[RIGHT].dataType)) {
+                            nodes[RIGHT] = ExpressionOp.getCastExpression(session,
+                                    nodes[RIGHT], nodes[LEFT].dataType);
+                        }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ExpressionLogical.java|(28291,449,<912,68>,<922,17>)
+  Lines: 912-922
+  Mass: 179 tokens
+  Code snippet:
+                               || nodes[LEFT].dataType.isBooleanType()) {
+                        if (session.database.sqlEnforceTypes) {
+                            throw Error.error(ErrorCode.X_42562);
+                        }
+    
+                        if (nodes[LEFT].dataType.canConvertFrom(
+                                nodes[RIGHT].dataType)) {
+                            nodes[RIGHT] = ExpressionOp.getCastExpression(session,
+                                    nodes[RIGHT], nodes[LEFT].dataType);
+                        }
+
+---
+
+Clone Class 5: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/types/CharacterType.java|(13089,281,<439,38>,<445,17>)
+  Lines: 439-445
+  Mass: 87 tokens
+  Code snippet:
+                    if (slen > precision) {
+                        if (getRightTrimSise((String) a, ' ') <= precision) {
+                            return ((String) a).substring(0, (int) precision);
+                        } else {
+                            throw Error.error(ErrorCode.X_22001);
+                        }
+                    }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/types/CharacterType.java|(12408,281,<418,38>,<424,17>)
+  Lines: 418-424
+  Mass: 87 tokens
+  Code snippet:
+                    if (slen > precision) {
+                        if (getRightTrimSise((String) a, ' ') <= precision) {
+                            return ((String) a).substring(0, (int) precision);
+                        } else {
+                            throw Error.error(ErrorCode.X_22001);
+                        }
+                    }
+
+---
+
+Clone Class 6: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/RangeVariableResolver.java|(13721,252,<430,16>,<437,17>)
+  Lines: 430-437
+  Mass: 102 tokens
+  Code snippet:
+                    if (idx < 0) {
+                        e.isSingleColumnEqual     = true;
+                        e.isSingleColumnCondition = true;
+    
+                        tempMap.put(e.getRightNode().getColumn(), e.getLeftNode());
+    
+                        continue;
+                    }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/RangeVariableResolver.java|(14193,252,<446,16>,<453,17>)
+  Lines: 446-453
+  Mass: 102 tokens
+  Code snippet:
+                    if (idx < 0) {
+                        e.isSingleColumnEqual     = true;
+                        e.isSingleColumnCondition = true;
+    
+                        tempMap.put(e.getRightNode().getColumn(), e.getLeftNode());
+    
+                        continue;
+                    }
+
+---
+
+Clone Class 7: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserDQL.java|(163699,238,<5944,44>,<5952,17>)
+  Lines: 5944-5952
+  Mass: 72 tokens
+  Code snippet:
+                    case SchemaObject.WRAPPER : {
+                        checkValidCatalogName(token.namePrefix);
+    
+                        if (token.namePrePrefix != null) {
+                            throw tooManyIdentifiers();
+                        }
+    
+                        break;
+                    }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserDQL.java|(163373,238,<5934,43>,<5942,17>)
+  Lines: 5934-5942
+  Mass: 72 tokens
+  Code snippet:
+                    case SchemaObject.SCHEMA : {
+                        checkValidCatalogName(token.namePrefix);
+    
+                        if (token.namePrePrefix != null) {
+                            throw tooManyIdentifiers();
+                        }
+    
+                        break;
+                    }
+
+---
+
+Clone Class 8: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/Scanner.java|(38490,258,<1506,56>,<1513,17>)
+  Lines: 1506-1513
+  Mass: 105 tokens
+  Code snippet:
+                    if (charAt(currentPosition + 1) == '>') {
+                        token.tokenString = Tokens.T_NOT_EQUALS;
+                        token.tokenType   = Tokens.NOT_EQUALS;
+                        currentPosition   += 2;
+                        token.isDelimiter = true;
+    
+                        return;
+                    }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/Scanner.java|(37904,258,<1489,56>,<1496,17>)
+  Lines: 1489-1496
+  Mass: 105 tokens
+  Code snippet:
+                    if (charAt(currentPosition + 1) == '=') {
+                        token.tokenString = Tokens.T_NOT_EQUALS;
+                        token.tokenType   = Tokens.NOT_EQUALS;
+                        currentPosition   += 2;
+                        token.isDelimiter = true;
+    
+                        return;
+                    }
+
+---
+
+Clone Class 9: (4 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserRoutine.java|(20338,188,<629,16>,<635,17>)
+  Lines: 629-635
+  Mass: 55 tokens
+  Code snippet:
+                    if (token.tokenType == Tokens.COMMA) {
+                        read();
+                    } else {
+                        readThis(Tokens.CLOSEBRACKET);
+    
+                        break;
+                    }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserRoutine.java|(24127,168,<753,12>,<759,13>)
+  Lines: 753-759
+  Mass: 55 tokens
+  Code snippet:
+                if (token.tokenType == Tokens.COMMA) {
+                    read();
+                } else {
+                    readThis(Tokens.CLOSEBRACKET);
+    
+                    break;
+                }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserDQL.java|(145294,188,<5244,16>,<5250,17>)
+  Lines: 5244-5250
+  Mass: 55 tokens
+  Code snippet:
+                    if (token.tokenType == Tokens.COMMA) {
+                        read();
+                    } else {
+                        readThis(Tokens.CLOSEBRACKET);
+    
+                        break;
+                    }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserDML.java|(40365,228,<1161,24>,<1167,25>)
+  Lines: 1161-1167
+  Mass: 55 tokens
+  Code snippet:
+                            if (token.tokenType == Tokens.COMMA) {
+                                read();
+                            } else {
+                                readThis(Tokens.CLOSEBRACKET);
+    
+                                break;
+                            }
+
+---
+
+Clone Class 10: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/lib/InputStreamWrapper.java|(2191,247,<60,26>,<67,9>)
+  Lines: 60-67
+  Mass: 87 tokens
+  Code snippet:
+            if (byteread < 0) {
+                if (limitSize == -1) {
+                    return -1;
+                } else {
+                    throw new IOException("stream not reached the end"
+                                          + fetchedSize + " " + limitSize);
+                }
+            }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/lib/InputStreamWrapper.java|(2964,247,<90,23>,<97,9>)
+  Lines: 90-97
+  Mass: 87 tokens
+  Code snippet:
+            if (count < 0) {
+                if (limitSize == -1) {
+                    return -1;
+                } else {
+                    throw new IOException("stream not reached the end"
+                                          + fetchedSize + " " + limitSize);
+                }
+            }
+
+---
+
+Clone Class 11: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserDDL.java|(46797,198,<1546,23>,<1551,17>)
+  Lines: 1546-1551
+  Mass: 68 tokens
+  Code snippet:
+                    } else if (token.tokenType == Tokens.RESTRICT) {
+                        read();
+                    } else {
+                        readThis(Tokens.NO);
+                        readThis(Tokens.ACTION);
+                    }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserDDL.java|(48008,198,<1582,23>,<1587,17>)
+  Lines: 1582-1587
+  Mass: 68 tokens
+  Code snippet:
+                    } else if (token.tokenType == Tokens.RESTRICT) {
+                        read();
+                    } else {
+                        readThis(Tokens.NO);
+                        readThis(Tokens.ACTION);
+                    }
+
+---
+
+Clone Class 12: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/FunctionSQL.java|(48756,343,<1323,36>,<1335,13>)
+  Lines: 1323-1335
+  Mass: 115 tokens
+  Code snippet:
+                case FUNC_CARDINALITY : {
+                    if (nodes[0].dataType == null) {
+                        throw Error.error(ErrorCode.X_42567);
+                    }
+    
+                    if (!nodes[0].dataType.isArrayType()) {
+                        throw Error.error(ErrorCode.X_42563);
+                    }
+    
+                    dataType = Type.SQL_INTEGER;
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/FunctionSQL.java|(49140,343,<1336,40>,<1348,13>)
+  Lines: 1336-1348
+  Mass: 115 tokens
+  Code snippet:
+                case FUNC_MAX_CARDINALITY : {
+                    if (nodes[0].dataType == null) {
+                        throw Error.error(ErrorCode.X_42567);
+                    }
+    
+                    if (!nodes[0].dataType.isArrayType()) {
+                        throw Error.error(ErrorCode.X_42563);
+                    }
+    
+                    dataType = Type.SQL_INTEGER;
+
+---
+
+Clone Class 13: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserDDL.java|(80405,266,<2570,20>,<2577,21>)
+  Lines: 2570-2577
+  Mass: 87 tokens
+  Code snippet:
+                        if (token.tokenType == Tokens.BY) {
+                            read();
+                            readThis(Tokens.DEFAULT);
+                        } else {
+                            readThis(Tokens.ALWAYS);
+    
+                            generatedAlways = true;
+                        }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserDDL.java|(83996,218,<2676,12>,<2683,13>)
+  Lines: 2676-2683
+  Mass: 87 tokens
+  Code snippet:
+                if (token.tokenType == Tokens.BY) {
+                    read();
+                    readThis(Tokens.DEFAULT);
+                } else {
+                    readThis(Tokens.ALWAYS);
+    
+                    generatedAlways = true;
+                }
+
+---
+
+Clone Class 14: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/server/OdbcUtil.java|(10113,397,<257,12>,<266,13>)
+  Lines: 257-266
+  Mass: 162 tokens
+  Code snippet:
+                if (c >= 'a' && c <= 'f') {
+                    octet += 10 + c - 'a';
+                } else if (c >= 'A' && c <= 'F') {
+                    octet += 10 + c - 'A';
+                } else if (c >= '0' && c <= '9') {
+                    octet += c - '0';
+                } else {
+                    throw new IllegalArgumentException(
+                        "Non-hex character in input at offset " + i + ": " + c);
+                }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/server/OdbcUtil.java|(10593,397,<269,12>,<278,13>)
+  Lines: 269-278
+  Mass: 162 tokens
+  Code snippet:
+                if (c >= 'a' && c <= 'f') {
+                    octet += 10 + c - 'a';
+                } else if (c >= 'A' && c <= 'F') {
+                    octet += 10 + c - 'A';
+                } else if (c >= '0' && c <= '9') {
+                    octet += c - '0';
+                } else {
+                    throw new IllegalArgumentException(
+                        "Non-hex character in input at offset " + i + ": " + c);
+                }
+
+---
+
+Clone Class 15: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserDDL.java|(149053,317,<4714,16>,<4724,17>)
+  Lines: 4714-4724
+  Mass: 75 tokens
+  Code snippet:
+                    switch (token.tokenType) {
+    
+                        case Tokens.ROUTINE :
+                        case Tokens.PROCEDURE :
+                        case Tokens.FUNCTION :
+                            read();
+                            break;
+    
+                        default :
+                            throw unexpectedToken();
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserDDL.java|(11521,317,<386,16>,<396,17>)
+  Lines: 386-396
+  Mass: 75 tokens
+  Code snippet:
+                    switch (token.tokenType) {
+    
+                        case Tokens.ROUTINE :
+                        case Tokens.PROCEDURE :
+                        case Tokens.FUNCTION :
+                            read();
+                            break;
+    
+                        default :
+                            throw unexpectedToken();
+
+---
+
+Clone Class 16: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/map/BaseHashMap.java|(12078,178,<396,19>,<400,13>)
+  Lines: 396-400
+  Mass: 82 tokens
+  Code snippet:
+                } else if (isIntValue) {
+                    intValueTable[lookup] = (int) longValue;
+                } else if (isLongValue) {
+                    longValueTable[lookup] = longValue;
+                }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/map/BaseHashMap.java|(13472,162,<446,15>,<450,9>)
+  Lines: 446-450
+  Mass: 82 tokens
+  Code snippet:
+            } else if (isIntValue) {
+                intValueTable[lookup] = (int) longValue;
+            } else if (isLongValue) {
+                longValueTable[lookup] = longValue;
+            }
+
+---
+
+Clone Class 17: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/index/IndexAVL.java|(44837,420,<1599,12>,<1611,13>)
+  Lines: 1599-1611
+  Mass: 176 tokens
+  Code snippet:
+                if (compareRow(session, data, nodeData) == 0) {
+                    row = c.getRow(store);
+    
+                    session.database.txManager.setTransactionInfo(store, row);
+    
+                    if (session.database.txManager.canRead(
+                            session, store, row, TransactionManager.ACTION_DUP,
+                            null)) {
+                        return true;
+                    }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/index/IndexAVL.java|(44193,420,<1573,12>,<1585,13>)
+  Lines: 1573-1585
+  Mass: 176 tokens
+  Code snippet:
+                if (compareRow(session, data, nodeData) == 0) {
+                    row = c.getRow(store);
+    
+                    session.database.txManager.setTransactionInfo(store, row);
+    
+                    if (session.database.txManager.canRead(
+                            session, store, row, TransactionManager.ACTION_DUP,
+                            null)) {
+                        return true;
+                    }
+
+---
+
+Clone Class 18: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/util/CodeSwitcher.java|(14760,267,<439,28>,<445,29>)
+  Lines: 439-445
+  Mass: 69 tokens
+  Code snippet:
+                                if (v.elementAt(i - 1).equals("")) {
+                                    v.insertElementAt("*/", i - 1);
+    
+                                    i++;
+                                } else {
+                                    v.insertElementAt("*/", i++);
+                                }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/util/CodeSwitcher.java|(13921,267,<415,28>,<421,29>)
+  Lines: 415-421
+  Mass: 69 tokens
+  Code snippet:
+                                if (v.elementAt(i - 1).equals("")) {
+                                    v.insertElementAt("*/", i - 1);
+    
+                                    i++;
+                                } else {
+                                    v.insertElementAt("*/", i++);
+                                }
+
+---
+
+Clone Class 19: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ExpressionOp.java|(22475,250,<674,28>,<681,29>)
+  Lines: 674-681
+  Mass: 53 tokens
+  Code snippet:
+                                if (wasEscape) {
+                                    escapeCount++;
+    
+                                    newArray[j++] = array[i];
+                                    wasEscape     = false;
+    
+                                    continue;
+                                }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ExpressionOp.java|(21859,250,<655,28>,<662,29>)
+  Lines: 655-662
+  Mass: 53 tokens
+  Code snippet:
+                                if (wasEscape) {
+                                    escapeCount++;
+    
+                                    newArray[j++] = array[i];
+                                    wasEscape     = false;
+    
+                                    continue;
+                                }
+
+---
+
+Clone Class 20: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/cmdline/SqlFile.java|(256768,394,<6150,12>,<6159,13>)
+  Lines: 6150-6159
+  Mass: 159 tokens
+  Code snippet:
+                if (c >= 'a' && c <= 'f') {
+                    octet += 10 + c - 'a';
+                } else if (c >= 'A' && c <= 'F') {
+                    octet += 10 + c - 'A';
+                } else if (c >= '0' && c <= '9') {
+                    octet += c - '0';
+                } else {
+                    throw new NumberFormatException(
+                        "Non-hex character in input at offset " + i + ": " + c);
+                }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/cmdline/SqlFile.java|(257245,394,<6162,12>,<6171,13>)
+  Lines: 6162-6171
+  Mass: 159 tokens
+  Code snippet:
+                if (c >= 'a' && c <= 'f') {
+                    octet += 10 + c - 'a';
+                } else if (c >= 'A' && c <= 'F') {
+                    octet += 10 + c - 'A';
+                } else if (c >= '0' && c <= '9') {
+                    octet += c - '0';
+                } else {
+                    throw new NumberFormatException(
+                        "Non-hex character in input at offset " + i + ": " + c);
+                }
+
+---
+
+Clone Class 21: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ExpressionOp.java|(25196,250,<752,28>,<759,29>)
+  Lines: 752-759
+  Mass: 53 tokens
+  Code snippet:
+                                if (wasEscape) {
+                                    escapeCount++;
+    
+                                    newArray[j++] = array[i];
+                                    wasEscape     = false;
+    
+                                    continue;
+                                }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ExpressionOp.java|(24580,250,<733,28>,<740,29>)
+  Lines: 733-740
+  Mass: 53 tokens
+  Code snippet:
+                                if (wasEscape) {
+                                    escapeCount++;
+    
+                                    newArray[j++] = array[i];
+                                    wasEscape     = false;
+    
+                                    continue;
+                                }
+
+---
+
+Clone Class 22: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserDQL.java|(149658,228,<5425,12>,<5431,13>)
+  Lines: 5425-5431
+  Mass: 102 tokens
+  Code snippet:
+                if (token.tokenType == Tokens.COMMA) {
+                    readThis(Tokens.COMMA);
+                } else if (token.tokenType == Tokens.CLOSEBRACKET) {
+                    readThis(Tokens.CLOSEBRACKET);
+    
+                    break;
+                }
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/hsqldb-2.3.1/hsqldb/src/org/hsqldb/ParserDQL.java|(148790,228,<5385,12>,<5391,13>)
+  Lines: 5385-5391
+  Mass: 102 tokens
+  Code snippet:
+                if (token.tokenType == Tokens.COMMA) {
+                    readThis(Tokens.COMMA);
+                } else if (token.tokenType == Tokens.CLOSEBRACKET) {
+                    readThis(Tokens.CLOSEBRACKET);
+    
+                    break;
+                }
+
+---
+

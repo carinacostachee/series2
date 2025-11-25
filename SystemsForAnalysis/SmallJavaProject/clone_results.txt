@@ -1,0 +1,4 @@
+=== Clone Detection Results ===
+Number of clone classes: 0
+Total number of clones: 0
+

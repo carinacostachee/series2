@@ -1,0 +1,37 @@
+=== Clone Detection Results ===
+Number of clone classes: 1
+Total number of clones: 2
+
+Clone Class 1: (2 clones)
+  Location: |java+compilationUnit:///SystemsForAnalysis/smallsql0.21_src/src/smallsql/database/IndexScrollStatus.java|(4100,428,<120,5>,<131,41>)
+  Lines: 120-131
+  Mass: 189 tokens
+  Code snippet:
+    					if(status.nodeValue != null){
+    						if(status.nodeValue instanceof IndexNode){
+    							level++;
+    							nodeStack.push(
+    								new IndexNodeScrollStatus( 	(IndexNode)status.nodeValue, 
+    														(expressions.get(level).getAlias() != SQLTokenizer.DESC_STR), 
+    														scroll, level));
+    							continue;
+    						}else
+    							return getReturnValue(status.nodeValue);
+
+  Location: |java+compilationUnit:///SystemsForAnalysis/smallsql0.21_src/src/smallsql/database/IndexScrollStatus.java|(3062,385,<89,5>,<99,6>)
+  Lines: 89-99
+  Mass: 189 tokens
+  Code snippet:
+    					if(status.nodeValue != null){
+    						if(status.nodeValue instanceof IndexNode){
+    							level++;
+    							nodeStack.push(
+    								new IndexNodeScrollStatus( 	(IndexNode)status.nodeValue, 
+    														(expressions.get(level).getAlias() != SQLTokenizer.DESC_STR), 
+    														scroll, level));
+    							continue;
+    						}else
+    							return getReturnValue(status.nodeValue);
+
+---
+
