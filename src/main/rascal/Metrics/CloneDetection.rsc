@@ -74,7 +74,10 @@ public list[Clone] extractSubtrees(node ast, int minSize) {
     list[Clone] candidates = [];
     
     visit(ast) {
-        case node n: {
+        // Collect nodes that carry source information (previously restricted to
+        // Statement, Block and MethodDeclaration) — we filter by presence of src.
+        case node n:
+        {
             if (n has src) {
                 int nodeCount = countNodes(n);
                 if (nodeCount >= minSize) {
@@ -82,6 +85,7 @@ public list[Clone] extractSubtrees(node ast, int minSize) {
                 }
             }
         }
+        // Note: The visitor implicitly handles traversing the rest of the AST
     }
     
     return candidates;
@@ -92,11 +96,15 @@ public list[ClassClones] groupCloneClasses(list[Clone] candidates){
     for(Clone c <- candidates){
         // Try to remove location annotations from the AST node
         node normalizedAST = visit(c.subtree) {
-            case node n => unset(n, "src")
+           case node n => unset(n, "src")
         };
         
-        str astString = "<normalizedAST>";
         
+        str astString = "<normalizedAST>";
+        // Debug: show what we're actually comparing for println statements
+        if (contains(astString, "println")) {
+            println("DEBUG - Comparing: <astString[0..100]>...");
+        }
         if (astString in groups){
             groups[astString] += [c];
         } else {
@@ -155,10 +163,9 @@ public bool isSubsumedBy(ClassClones cc1, ClassClones cc2) {
     return true;
 }
 
-// Calculate statistics
+// Calculate statistics - fixed to avoid double-counting lines
 public map[str, int] calculateStats(list[ClassClones] cloneClasses, set[loc] javaFiles) {
     int totalLines = 0;
-    int duplicatedLines = 0;
     int numberOfClones = 0;
     int numberOfCloneClasses = size(cloneClasses);
     int biggestCloneSize = 0;
@@ -174,7 +181,9 @@ public map[str, int] calculateStats(list[ClassClones] cloneClasses, set[loc] jav
         }
     }
     
-    // Count duplicated lines
+    // Collect unique duplicated line ranges to avoid double-counting
+    set[tuple[int,int]] duplicatedLineRanges = {};
+    
     for (ClassClones cc <- cloneClasses) {
         if (size(cc) > biggestCloneClassSize) {
             biggestCloneClassSize = size(cc);
@@ -183,7 +192,9 @@ public map[str, int] calculateStats(list[ClassClones] cloneClasses, set[loc] jav
         for (Clone c <- cc) {
             numberOfClones += 1;
             int cloneLines = c.location.end.line - c.location.begin.line + 1;
-            duplicatedLines += cloneLines;
+            
+            // Track unique line ranges
+            duplicatedLineRanges += <c.location.begin.line, c.location.end.line>;
             
             if (cloneLines > biggestCloneSize) {
                 biggestCloneSize = cloneLines;
@@ -191,7 +202,12 @@ public map[str, int] calculateStats(list[ClassClones] cloneClasses, set[loc] jav
         }
     }
     
-    // Use integer percentage to avoid mixing real and int in the returned map
+    // Count unique duplicated lines
+    int duplicatedLines = 0;
+    for (<int startLine, int endLine> <- duplicatedLineRanges) {
+        duplicatedLines += (endLine - startLine + 1);
+    }
+    
     int duplicatedLinesPercentage = totalLines > 0 ? (duplicatedLines * 100) / totalLines : 0;
     
     return (
@@ -245,7 +261,7 @@ public void writeClonesToFile(list[ClassClones] cloneClasses, loc outputFile) {
 // Test the implementation
 public void testCloneDetection() {
     loc testProject = |project://series2/SystemsForAnalysis/SmallJavaProject|;
-    int minCloneSize = 5;
+    int minCloneSize = 15;
     
     tuple[list[ClassClones], map[str, int]] result = detectTypeOneClones(testProject, minCloneSize);
     list[ClassClones] cloneClasses = result<0>;
