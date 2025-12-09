@@ -1,277 +1,256 @@
 module Metrics::CloneDetection
 
+import lang::java::m3::Core;
+import lang::java::m3::AST;
 import IO;
 import List;
 import Set;
-import String;
-import lang::java::m3::Core;
-import lang::java::m3::AST;
 import Map;
+import String;
 import Node;
-import util::Math;
+/*
+-First step is to create data structures that define a clone and a class where we can store these clones.
+-The clone is a piece of code that we are analyzing, and it is defined as a tuple that contains the location
+of the code, the AST structure of the code and the nodeCount is telling us how many nodes are in the AST 
+structure.
+-The class ClassClones is just a list that contains the clones. 
+*/
+alias Clone = tuple[loc location, node subtree, int nodeCount];
+alias ClassClones = list[Clone];
 
-import Metrics::Helpers;
+/*
+-Second step is to create the main function that detects the Type 1 clones in a Java project.
+*/
+public tuple[list[ClassClones], map[str,int]] detectTypeOneClones(loc projectPath, int minCloneNodeNumber){
+    println("Starting clone detection for: <projectPath>");
+    //here we create M3 model from the Java project using Rascal's function that parses Java projects
+    M3 model = createM3FromMavenProject(projectPath);
 
-// Configuration
-// Configuration
-int MIN_CLONE_SIZE = 3; // Lowered from 6 to catch small test methods
-int MIN_MASS = 10;      // Lowered from 50 to catch small test methods
+    //then we get the java files from the java project
+    set[loc] javaFiles = files(model);
+    println("There are <size(javaFiles)> files");
 
-// Data structures for clone detection
-alias CloneFragment = tuple[node subtree, loc location, int mass];
-alias CloneClass = set[CloneFragment];
+    //now we need a list to store all the subtrees
+    list[Clone] allCandidates = [];
 
-tuple[int lines, real percentage] calculateDuplication(loc projectLocation) {
-    println("Starting AST-based clone detection...");
-    
-    // Get all ASTs for the project
-    list[Declaration] asts = getASTs(projectLocation);
-    
-    // Extract all subtrees with their locations
-    list[CloneFragment] fragments = [];
-    for (ast <- asts) {
-        fragments += extractFragments(ast);
-    }
-    
-    println("Extracted <size(fragments)> fragments");
-    
-    // Group fragments by normalized subtree
-    map[node, list[CloneFragment]] groups = ();
-    for (fragment <- fragments) {
-        node normalized = normalizeAST(fragment.subtree);
-        if (normalized in groups) {
-            groups[normalized] += fragment;
-        } else {
-            groups[normalized] = [fragment];
+    //we then iterate through each file and parse it into an AST, then break the AST into subtrees, then add them
+    // to the list we made.
+    for(loc javaFile <- javaFiles){
+        try {
+            println("Currently processing: <javaFile.file>");
+            Declaration ast = createAstFromFile(javaFile, true);
+            list[Clone] candidates = extractSubtrees(ast, minCloneNodeNumber);
+            allCandidates += candidates;
+
+        } catch Exception e: {
+            println("Error processing <javaFile>: <e> ");
         }
     }
+    println("Extracted <size(allCandidates)> candidate subtree");
+
+    // Group identical subtrees into clone classes
+    list[ClassClones] cloneClasses = groupCloneClasses(allCandidates);
+
+    // Apply subsumption (remove smaller clones contained in larger ones)
+    list[ClassClones] filteredClasses = applySubsumption(cloneClasses);
+
+    // Calculate statistics
+    map[str, int] stats = calculateStats(filteredClasses, javaFiles);
     
-    // Find clone classes (groups with 2+ fragments)
-    list[CloneClass] cloneClasses = [];
-    for (normalized <- groups, size(groups[normalized]) >= 2) {
-        cloneClasses += {*groups[normalized]};
-    }
-    
-    println("Found <size(cloneClasses)> clone classes before subsumption");
-    
-    // Apply subsumption to remove included clones
-    cloneClasses = removeSubsumedClones(cloneClasses);
-    
-    println("Found <size(cloneClasses)> clone classes after subsumption");
-    
-    // Calculate duplication statistics
-    tuple[int, real] stats = calculateStats(cloneClasses, projectLocation);
-    
-    // Write results to file
-    writeCloneResults(cloneClasses, projectLocation);
-    
-    return stats;
+    return <filteredClasses, stats>;
 }
 
-// Extract all meaningful subtrees from an AST
-list[CloneFragment] extractFragments(Declaration ast) {
-    list[CloneFragment] fragments = [];
+//this is a function that is counting the nodes in the subtree
+public int countNodes(node n) {
+    int count = 1;
+    visit(n) {
+        case node _: count += 1;
+    }
+    return count;
+}
+
+// Extract all subtrees of minimum size from an AST
+public list[Clone] extractSubtrees(node ast, int minSize) {
+    list[Clone] candidates = [];
     
     visit(ast) {
-        case Statement stmt: {
-            if (isCloneCandidate(stmt) && stmt has src) {
-                int mass = calculateMass(stmt);
-                if (mass >= MIN_MASS) {
-                    fragments += <stmt, stmt.src, mass>;
-                }
-            }
-        }
-        case Declaration decl: {
-            if (isCloneCandidate(decl) && decl has src) {
-                int mass = calculateMass(decl);
-                if (mass >= MIN_MASS) {
-                    fragments += <decl, decl.src, mass>;
+        case node n: {
+            if (n has src) {
+                int nodeCount = countNodes(n);
+                if (nodeCount >= minSize) {
+                    candidates += <n.src, n, nodeCount>;
                 }
             }
         }
     }
     
-    return fragments;
+    return candidates;
 }
+public list[ClassClones] groupCloneClasses(list[Clone] candidates){
+    map[str, list[Clone]] groups = ();
 
-// Check if a node is a good candidate for cloning
-bool isCloneCandidate(node n) {
-    return size([stmt | /Statement stmt := n]) >= MIN_CLONE_SIZE;
-}
-
-// Calculate the mass (node count) of a subtree
-int calculateMass(node n) {
-    int mass = 0;
-    // Count every node in the tree (statements, expressions, literals, etc.)
-    visit(n) {
-        case node _ : mass += 1;
+    for(Clone c <- candidates){
+        // Try to remove location annotations from the AST node
+        node normalizedAST = visit(c.subtree) {
+            case node n => unset(n, "src")
+        };
+        
+        str astString = "<normalizedAST>";
+        
+        if (astString in groups){
+            groups[astString] += [c];
+        } else {
+            groups[astString] = [c];
+        }
     }
-    return mass;
-}
-
-// Normalize AST for Type I clone detection
-node normalizeAST(node n) {
-    return visit(n) {
-        // Remove source locations
-        case node x => unsetRec(x, "src")
-        // Normalize identifiers (for Type II clones, uncomment these lines)
-        // case \variable(str name) => \variable("VAR")
-        // case \variable(str name, int extraDimensions) => \variable("VAR", extraDimensions)
-        // case \simpleName(str name) => \simpleName("VAR")
-    };
-}
-
-// Remove subsumed clone classes
-list[CloneClass] removeSubsumedClones(list[CloneClass] cloneClasses) {
-    list[CloneClass] result = [];
     
-    for (cc1 <- cloneClasses) {
+    list[ClassClones] cloneClasses = [];
+    for(str astStr <- domain(groups)){
+        if(size(groups[astStr]) > 1){
+            cloneClasses += [groups[astStr]];
+            println("Clone class found: <size(groups[astStr])> members");
+        }
+    }
+    
+    return cloneClasses;
+}
+// Apply subsumption
+public list[ClassClones] applySubsumption(list[ClassClones] cloneClasses) {
+    list[ClassClones] filtered = [];
+    
+    for (ClassClones cc1 <- cloneClasses) {
         bool isSubsumed = false;
-        for (cc2 <- cloneClasses, cc1 != cc2) {
+        
+        for (ClassClones cc2 <- cloneClasses, cc1 != cc2) {
             if (isSubsumedBy(cc1, cc2)) {
                 isSubsumed = true;
                 break;
             }
         }
+        
         if (!isSubsumed) {
-            result += cc1;
+            filtered += [cc1];
         }
     }
     
-    return result;
+    return filtered;
 }
 
-// Check if clone class cc1 is subsumed by cc2
-bool isSubsumedBy(CloneClass cc1, CloneClass cc2) {
-    for (frag1 <- cc1) {
-        bool found = false;
-        for (frag2 <- cc2) {
-            // Check if frag1's location is fully contained within frag2's location
-            if (frag1.location.scheme == frag2.location.scheme &&
-                frag1.location.path == frag2.location.path &&
-                frag1.location != frag2.location) {  // Must be different locations
-                
-                // Use offset and length for containment check
-                int offset1 = frag1.location.offset;
-                int length1 = frag1.location.length;
-                int offset2 = frag2.location.offset;
-                int length2 = frag2.location.length;
-                
-                // frag1 is contained in frag2 if it starts after and ends before
-                if (offset1 >= offset2 && (offset1 + length1) <= (offset2 + length2)) {
-                    found = true;
-                    break;
-                }
+// Check if cc1 is subsumed by cc2
+public bool isSubsumedBy(ClassClones cc1, ClassClones cc2) {
+    for (Clone c1 <- cc1) {
+        bool contained = false;
+        for (Clone c2 <- cc2) {
+            if (c1.location.offset >= c2.location.offset && 
+                (c1.location.offset + c1.location.length) <= (c2.location.offset + c2.location.length) &&
+                c1.location != c2.location) {
+                contained = true;
+                break;
             }
         }
-        if (!found) return false;
+        if (!contained) {
+            return false;
+        }
     }
     return true;
 }
 
-// Calculate duplication statistics
-tuple[int, real] calculateStats(list[CloneClass] cloneClasses, loc project) {
-    // Get total project size
-    M3 model = createM3FromMavenProject(project);
+// Calculate statistics
+public map[str, int] calculateStats(list[ClassClones] cloneClasses, set[loc] javaFiles) {
     int totalLines = 0;
-    for (file <- files(model.containment), isCompilationUnit(file)) {
-        totalLines += countSLOC(file);
+    int duplicatedLines = 0;
+    int numberOfClones = 0;
+    int numberOfCloneClasses = size(cloneClasses);
+    int biggestCloneSize = 0;
+    int biggestCloneClassSize = 0;
+    
+    // Count total lines
+    for (loc file <- javaFiles) {
+        try {
+            str content = readFile(file);
+            totalLines += size(split("\n", content));
+        } catch: {
+            println("Could not read file: <file>");
+        }
     }
     
-    // Calculate duplicated lines by tracking unique (file, line) pairs
-    set[tuple[str, int]] duplicatedLines = {};
-    
-    for (cloneClass <- cloneClasses) {
-        for (fragment <- cloneClass) {
-            if (fragment.location.scheme != "unknown") {
-                str filePath = fragment.location.path;
-                int startLine = fragment.location.begin.line;
-                int endLine = fragment.location.end.line;
-                
-                // Add each line as a unique (file, line) tuple
-                for (int line <- [startLine..endLine + 1]) {
-                    duplicatedLines += <filePath, line>;
-                }
+    // Count duplicated lines
+    for (ClassClones cc <- cloneClasses) {
+        if (size(cc) > biggestCloneClassSize) {
+            biggestCloneClassSize = size(cc);
+        }
+        
+        for (Clone c <- cc) {
+            numberOfClones += 1;
+            int cloneLines = c.location.end.line - c.location.begin.line + 1;
+            duplicatedLines += cloneLines;
+            
+            if (cloneLines > biggestCloneSize) {
+                biggestCloneSize = cloneLines;
             }
         }
     }
     
-    int dupLines = size(duplicatedLines);
-    real percentage = totalLines > 0 ? round((dupLines * 100.0) / totalLines, 0.01) : 0.0;
+    // Use integer percentage to avoid mixing real and int in the returned map
+    int duplicatedLinesPercentage = totalLines > 0 ? (duplicatedLines * 100) / totalLines : 0;
     
-    return <dupLines, percentage>;
+    return (
+        "totalFiles": size(javaFiles),
+        "totalLines": totalLines,
+        "duplicatedLines": duplicatedLines,
+        "duplicatedLinesPercentage": duplicatedLinesPercentage,
+        "numberOfClones": numberOfClones,
+        "numberOfCloneClasses": numberOfCloneClasses,
+        "biggestClone": biggestCloneSize,
+        "biggestCloneClass": biggestCloneClassSize
+    );
 }
 
-// Write clone detection results to file
-void writeCloneResults(list[CloneClass] cloneClasses, loc project) {
-    loc outputFile = project + "clone_results.txt";
+// Print statistics
+public void printStats(map[str, int] stats) {
+    println("=== CLONE DETECTION STATISTICS ===");
+    println("Total files analyzed: <stats["totalFiles"]>");
+    println("Total lines of code: <stats["totalLines"]>");
+    println("Duplicated lines: <stats["duplicatedLines"]>");
+    println("Percentage of duplicated lines: <stats["duplicatedLinesPercentage"]>%");
+    println("Number of clones: <stats["numberOfClones"]>");
+    println("Number of clone classes: <stats["numberOfCloneClasses"]>");
+    println("Biggest clone: <stats["biggestClone"]> lines");
+    println("Biggest clone class: <stats["biggestCloneClass"]> members");
+}
+
+// Write results to file
+public void writeClonesToFile(list[ClassClones] cloneClasses, loc outputFile) {
+    str output = "CLONE DETECTION RESULTS\n";
+    output += "========================\n\n";
     
-    str report = "=== Clone Detection Results ===\n";
-    report += "Number of clone classes: <size(cloneClasses)>\n";
-    
-    int totalClones = 0;
-    for (cc <- cloneClasses) totalClones += size(cc);
-    report += "Total number of clones: <totalClones>\n\n";
-    
-    // Report each clone class
-    int classId = 1;
-    for (cloneClass <- cloneClasses) {
-        report += "Clone Class <classId>: (<size(cloneClass)> clones)\n";
+    int classIndex = 1;
+    for (ClassClones cc <- cloneClasses) {
+        output += "Clone Class <classIndex>: (<size(cc)> clones)\n";
         
-        for (fragment <- cloneClass) {
-            report += "  Location: <fragment.location>\n";
-            report += "  Lines: <fragment.location.begin.line>-<fragment.location.end.line>\n";
-            report += "  Mass: <fragment.mass> tokens\n";
-            
-            // Show a snippet of the code
-            try {
-                str content = readFile(fragment.location.top);
-                list[str] allLines = split("\n", content);
-                
-                int startLine = fragment.location.begin.line - 1; // 0-indexed
-                int endLine = min(fragment.location.end.line, startLine + 10); // Show max 10 lines
-                
-                report += "  Code snippet:\n";
-                for (int i <- [startLine..min(endLine, size(allLines))]) {
-                    report += "    <allLines[i]>\n";
-                }
-                if (endLine - startLine > 10) {
-                    report += "    ... (<endLine - startLine - 10> more lines)\n";
-                }
-            } catch: {
-                report += "  (Code snippet unavailable)\n";
-            }
-            report += "\n";
+        int cloneIndex = 1;
+        for (Clone c <- cc) {
+            int lines = c.location.end.line - c.location.begin.line + 1;
+            output += "  Clone <cloneIndex>: <c.location> (<lines> lines)\n";
+            cloneIndex += 1;
         }
-        report += "---\n\n";
-        classId += 1;
+        output += "\n";
+        classIndex += 1;
     }
     
-    writeFile(outputFile, report);
+    writeFile(outputFile, output);
     println("Clone results written to: <outputFile>");
 }
 
-str rankDuplication(real percentage) {
-    if (percentage >= 0.0 && percentage < 3.0) return "++";
-    if (percentage >= 3.0 && percentage < 5.0) return "+";
-    if (percentage >= 5.0 && percentage < 10.0) return "o";
-    if (percentage >= 10.0 && percentage < 20.0) return "-";
-    return "--";
-}
-
-void reportDuplication(loc project) {
-    println("=== AST-Based Clone Detection ===");
-    tuple[int lines, real pct] result = calculateDuplication(project);
-    str rank = rankDuplication(result.pct);
-    
-    println("Duplicated Lines: <result.lines>");
-    println("Percentage:       <result.pct>%");
-    println("SIG Rank:         <rank>");
-    println();
-}
-
 // Test the implementation
-void testCloneDetection() {
+public void testCloneDetection() {
     loc testProject = |project://series2/SystemsForAnalysis/SmallJavaProject|;
-    reportDuplication(testProject);
+    int minCloneSize = 5;
+    
+    tuple[list[ClassClones], map[str, int]] result = detectTypeOneClones(testProject, minCloneSize);
+    list[ClassClones] cloneClasses = result<0>;
+    map[str, int] stats = result<1>;
+    
+    printStats(stats);
+    writeClonesToFile(cloneClasses, |file:///tmp/clones.txt|);
 }
