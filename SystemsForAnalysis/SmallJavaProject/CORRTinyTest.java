@@ -1,4 +1,4 @@
-public class TinyTest {
+public class CORRTinyTest {
     
    // Pattern 1: Two IDENTICAL if-statements (should be 1 clone class with 2 members)
     public void checkA(int x) {
@@ -18,3 +18,5 @@ public class TinyTest {
         System.out.println("unique message");
     }
 }
+
+// x != y which means those should not be clones

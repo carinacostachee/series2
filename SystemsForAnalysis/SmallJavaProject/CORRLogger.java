@@ -1,4 +1,4 @@
-public class Logger {
+public class CORRLogger {
     
     // Original logging method
     public void logMessage(String msg) {

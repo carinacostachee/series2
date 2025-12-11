@@ -96,20 +96,21 @@ public list[ClassClones] groupCloneClasses(list[Clone] candidates){
     for(Clone c <- candidates){
         // Try to remove location annotations from the AST node
         node normalizedAST = visit(c.subtree) {
-           case node n => unset(n, "src")
+           //case node n => unset(unset(n,"src"),"typ")
+           case node n => unset(unset(unset(n,"src"), "decl"),"typ")
+           //case node n => unset(unset(n,"src"), "decl")
         };
         
         
         str astString = "<normalizedAST>";
-        // Debug: show what we're actually comparing for println statements
-        if (contains(astString, "println")) {
-            println("DEBUG - Comparing: <astString[0..100]>...");
-        }
+
         if (astString in groups){
             groups[astString] += [c];
         } else {
             groups[astString] = [c];
         }
+
+        
     }
     
     list[ClassClones] cloneClasses = [];
@@ -268,5 +269,5 @@ public void testCloneDetection() {
     map[str, int] stats = result<1>;
     
     printStats(stats);
-    writeClonesToFile(cloneClasses, |file:///tmp/clones.txt|);
+    writeClonesToFile(cloneClasses, |project://series2/SystemsForAnalysis/SmallJavaProject/clone_results.txt|);
 }

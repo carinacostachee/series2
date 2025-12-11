@@ -1,4 +1,4 @@
-public class DataProcessor {
+public class CORRDataProcessor {
     
     // Original array processing
     public void processData(int[] data) {
