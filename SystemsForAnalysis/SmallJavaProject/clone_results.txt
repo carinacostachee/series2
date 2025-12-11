@@ -2,10 +2,10 @@ CLONE DETECTION RESULTS
 ========================
 
 Clone Class 1: (2 clones)
-  Clone 1: |java+compilationUnit:///SystemsForAnalysis/SmallJavaProject/TestSubsumption.java|(99,40,<4,8>,<4,48>) (1 lines)
-  Clone 2: |java+compilationUnit:///SystemsForAnalysis/SmallJavaProject/TestSubsumption.java|(380,40,<12,8>,<12,48>) (1 lines)
+  Clone 1: |java+compilationUnit:///SystemsForAnalysis/SmallJavaProject/TestFolder/CORRLogger.java|(101,224,<4,39>,<9,5>) (6 lines)
+  Clone 2: |java+compilationUnit:///SystemsForAnalysis/SmallJavaProject/TestFolder/CORRLogger.java|(394,224,<12,37>,<17,5>) (6 lines)
 
 Clone Class 2: (2 clones)
-  Clone 1: |java+compilationUnit:///SystemsForAnalysis/SmallJavaProject/TestSubsumption.java|(268,36,<8,8>,<8,44>) (1 lines)
-  Clone 2: |java+compilationUnit:///SystemsForAnalysis/SmallJavaProject/TestSubsumption.java|(549,36,<16,8>,<16,44>) (1 lines)
+  Clone 1: |java+compilationUnit:///SystemsForAnalysis/SmallJavaProject/CORRDataProcessor.java|(111,356,<4,40>,<17,5>) (14 lines)
+  Clone 2: |java+compilationUnit:///SystemsForAnalysis/SmallJavaProject/CORRDataProcessor.java|(539,356,<20,40>,<33,5>) (14 lines)
 

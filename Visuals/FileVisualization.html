@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clone Detection Visualization - File View</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #ecf0f1;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .file-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .file-input-container input[type="file"] {
+            padding: 8px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .file-input-container button {
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .file-input-container button:hover {
+            background: #2980b9;
+        }
+
+        .visualization-area {
+            padding: 20px;
+            min-height: 600px;
+        }
+
+        .folder-view {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .folder-item, .file-item {
+            border: 2px solid #bdc3c7;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .folder-item {
+            background: linear-gradient(to bottom, #ecf0f1 0%, #bdc3c7 100%);
+            padding: 10px;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .folder-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            border-color: #3498db;
+        }
+
+        .file-item {
+            background: #fff;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            min-width: 100px;
+            min-height: 80px;
+        }
+
+        .file-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border-color: #e74c3c;
+            z-index: 10;
+        }
+
+        .file-clone-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, #e74c3c, #c0392b);
+            transition: height 0.3s;
+        }
+
+        .file-name {
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            word-break: break-word;
+            z-index: 1;
+            color: #2c3e50;
+        }
+
+        .file-clone-count {
+            font-size: 10px;
+            color: #7f8c8d;
+            z-index: 1;
+            margin-top: 4px;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 400px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .tooltip h4 {
+            margin-bottom: 8px;
+            color: #3498db;
+            font-size: 14px;
+        }
+
+        .tooltip-section {
+            margin-bottom: 8px;
+        }
+
+        .tooltip-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .clone-detail {
+            background: rgba(255,255,255,0.1);
+            padding: 6px;
+            margin: 4px 0;
+            border-radius: 3px;
+            border-left: 3px solid #e74c3c;
+        }
+
+        .breadcrumb {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .breadcrumb a {
+            color: #3498db;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .legend {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: #495057;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .no-data h2 {
+            margin-bottom: 10px;
+            color: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Clone Detection - File View</h1>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalFiles">0</div>
+                    <div>Files</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalClones">0</div>
+                    <div>Clone Classes</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="file-input-container">
+                <label for="jsonFile">Load Clone Data:</label>
+                <input type="file" id="jsonFile" accept=".json">
+                <button onclick="loadSampleData()">Load Sample Data</button>
+            </div>
+        </div>
+
+        <div class="breadcrumb" id="breadcrumb">
+            <a onclick="goToRoot()">📁 Root</a>
+        </div>
+
+        <div class="visualization-area" id="vizArea">
+            <div class="no-data">
+                <h2>No Data Loaded</h2>
+                <p>Please load a clone_data.json file generated by the Rascal clone detector.</p>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #bdc3c7;"></div>
+                <span>Folder</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(to top, #e74c3c, #fff);"></div>
+                <span>File (red bar = clone intensity)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        let cloneData = null;
+        let currentFolder = null;
+
+        document.getElementById('jsonFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        cloneData = JSON.parse(event.target.result);
+                        renderVisualization();
+                    } catch (error) {
+                        alert('Error parsing JSON file: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function loadSampleData() {
+            // Sample data for demonstration
+            cloneData = {
+                "files": [
+                    {
+                        "path": "src/main/java/Utility.java",
+                        "file": "Utility.java",
+                        "folder": "src/main/java",
+                        "cloneCount": 3,
+                        "cloneLines": 45,
+                        "clones": [
+                            {"classId": 0, "startLine": 10, "endLine": 25, "lines": 16, "cloneClassSize": 3},
+                            {"classId": 1, "startLine": 30, "endLine": 45, "lines": 16, "cloneClassSize": 2},
+                            {"classId": 2, "startLine": 50, "endLine": 62, "lines": 13, "cloneClassSize": 3}
+                        ]
+                    },
+                    {
+                        "path": "src/main/java/Parser.java",
+                        "file": "Parser.java",
+                        "folder": "src/main/java",
+                        "cloneCount": 2,
+                        "cloneLines": 30,
+                        "clones": [
+                            {"classId": 0, "startLine": 15, "endLine": 30, "lines": 16, "cloneClassSize": 3},
+                            {"classId": 3, "startLine": 40, "endLine": 53, "lines": 14, "cloneClassSize": 2}
+                        ]
+                    },
+                    {
+                        "path": "src/test/java/TestUtil.java",
+                        "file": "TestUtil.java",
+                        "folder": "src/test/java",
+                        "cloneCount": 1,
+                        "cloneLines": 18,
+                        "clones": [
+                            {"classId": 1, "startLine": 20, "endLine": 37, "lines": 18, "cloneClassSize": 2}
+                        ]
+                    }
+                ],
+                "totalCloneClasses": 4
+            };
+            renderVisualization();
+        }
+
+        function renderVisualization() {
+            if (!cloneData) return;
+
+            document.getElementById('totalFiles').textContent = cloneData.files.length;
+            document.getElementById('totalClones').textContent = cloneData.totalCloneClasses;
+
+            if (currentFolder === null) {
+                renderFolderView();
+            } else {
+                renderFileView(currentFolder);
+            }
+        }
+
+        function renderFolderView() {
+            const folders = {};
+            
+            cloneData.files.forEach(file => {
+                const folder = file.folder || 'root';
+                if (!folders[folder]) {
+                    folders[folder] = {
+                        name: folder,
+                        files: [],
+                        totalClones: 0,
+                        totalLines: 0
+                    };
+                }
+                folders[folder].files.push(file);
+                folders[folder].totalClones += file.cloneCount;
+                folders[folder].totalLines += file.cloneLines;
+            });
+
+            const vizArea = document.getElementById('vizArea');
+            vizArea.innerHTML = '<div class="folder-view"></div>';
+            const folderView = vizArea.querySelector('.folder-view');
+
+            Object.values(folders).forEach(folder => {
+                const folderDiv = document.createElement('div');
+                folderDiv.className = 'folder-item';
+                folderDiv.innerHTML = `
+                    <div style="font-size: 32px; margin-bottom: 5px;">📁</div>
+                    <div style="font-weight: 600; font-size: 12px; margin-bottom: 5px;">${folder.name.split('/').pop() || 'root'}</div>
+                    <div style="font-size: 11px; color: #7f8c8d;">${folder.files.length} files</div>
+                    <div style="font-size: 11px; color: #e74c3c; font-weight: 600;">${folder.totalClones} clones</div>
+                `;
+                folderDiv.onclick = () => {
+                    currentFolder = folder.name;
+                    renderFileView(folder.name);
+                };
+                folderView.appendChild(folderDiv);
+            });
+
+            updateBreadcrumb();
+        }
+
+        function renderFileView(folderName) {
+            const files = cloneData.files.filter(f => (f.folder || 'root') === folderName);
+            
+            const vizArea = document.getElementById('vizArea');
+            vizArea.innerHTML = '<div class="folder-view"></div>';
+            const folderView = vizArea.querySelector('.folder-view');
+
+            // Calculate max clones for scaling
+            const maxClones = Math.max(...files.map(f => f.cloneLines));
+
+            files.forEach(file => {
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'file-item';
+                
+                // Calculate size based on clone intensity
+                const baseSize = 100;
+                const cloneRatio = file.cloneLines / maxClones;
+                const size = baseSize + (cloneRatio * 80);
+                
+                fileDiv.style.width = size + 'px';
+                fileDiv.style.height = size + 'px';
+                
+                const barHeight = Math.max(20, cloneRatio * 100);
+                
+                fileDiv.innerHTML = `
+                    <div class="file-clone-bar" style="height: ${barHeight}%;"></div>
+                    <div class="file-name">${file.file}</div>
+                    <div class="file-clone-count">${file.cloneCount} clone(s)</div>
+                `;
+
+                fileDiv.onmousemove = (e) => showTooltip(e, file);
+                fileDiv.onmouseleave = hideTooltip;
+
+                folderView.appendChild(fileDiv);
+            });
+
+            updateBreadcrumb();
+        }
+
+        function showTooltip(event, file) {
+            const tooltip = document.getElementById('tooltip');
+            
+            let tooltipHTML = `
+                <h4>📄 ${file.file}</h4>
+                <div class="tooltip-section">
+                    <strong>Path:</strong> ${file.path}<br>
+                    <strong>Total Clones:</strong> ${file.cloneCount}<br>
+                    <strong>Clone Lines:</strong> ${file.cloneLines}
+                </div>
+                <div class="tooltip-section">
+                    <strong>Duplicates:</strong>
+            `;
+
+            file.clones.forEach((clone, idx) => {
+                tooltipHTML += `
+                    <div class="clone-detail">
+                        <strong>Clone ${idx + 1}:</strong> Lines ${clone.startLine} to ${clone.endLine} (${clone.lines} lines)<br>
+                        <small>Clone Class ${clone.classId} (${clone.cloneClassSize} members)</small>
+                    </div>
+                `;
+            });
+
+            tooltipHTML += '</div>';
+            
+            tooltip.innerHTML = tooltipHTML;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (event.pageX + 15) + 'px';
+            tooltip.style.top = (event.pageY + 15) + 'px';
+        }
+
+        function hideTooltip() {
+            document.getElementById('tooltip').style.display = 'none';
+        }
+
+        function goToRoot() {
+            currentFolder = null;
+            renderFolderView();
+        }
+
+        function updateBreadcrumb() {
+            const breadcrumb = document.getElementById('breadcrumb');
+            if (currentFolder === null) {
+                breadcrumb.innerHTML = '<a onclick="goToRoot()">📁 Root</a>';
+            } else {
+                breadcrumb.innerHTML = `
+                    <a onclick="goToRoot()">📁 Root</a> / 
+                    <span style="color: #2c3e50; font-weight: 600;">${currentFolder}</span>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

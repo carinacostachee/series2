@@ -1,0 +1,55 @@
+{
+  "files": [
+    {
+      "path": "/SystemsForAnalysis/SmallJavaProject/CORRDataProcessor.java",
+      "file": "CORRDataProcessor.java",
+      "folder": "/SystemsForAnalysis/SmallJavaProject",
+      "cloneCount": 2,
+      "cloneLines": 28,
+      "clones": [
+        {
+          "classId": 1,
+          "startLine": 4,
+          "endLine": 17,
+          "lines": 14,
+          "cloneClassSize": 2,
+          "file": "CORRDataProcessor.java"
+        },
+        {
+          "classId": 1,
+          "startLine": 20,
+          "endLine": 33,
+          "lines": 14,
+          "cloneClassSize": 2,
+          "file": "CORRDataProcessor.java"
+        }
+      ]
+    },
+    {
+      "path": "/SystemsForAnalysis/SmallJavaProject/TestFolder/CORRLogger.java",
+      "file": "CORRLogger.java",
+      "folder": "/SystemsForAnalysis/SmallJavaProject/TestFolder",
+      "cloneCount": 2,
+      "cloneLines": 12,
+      "clones": [
+        {
+          "classId": 0,
+          "startLine": 4,
+          "endLine": 9,
+          "lines": 6,
+          "cloneClassSize": 2,
+          "file": "CORRLogger.java"
+        },
+        {
+          "classId": 0,
+          "startLine": 12,
+          "endLine": 17,
+          "lines": 6,
+          "cloneClassSize": 2,
+          "file": "CORRLogger.java"
+        }
+      ]
+    }
+  ],
+  "totalCloneClasses": 2
+}

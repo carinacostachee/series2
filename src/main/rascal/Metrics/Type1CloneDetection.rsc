@@ -1,4 +1,4 @@
-module Metrics::CloneDetection
+module Metrics::Type1CloneDetection
 
 import lang::java::m3::Core;
 import lang::java::m3::AST;
@@ -8,6 +8,121 @@ import Set;
 import Map;
 import String;
 import Node;
+
+// Add this function to your Metrics::CloneDetection module
+// This exports clone detection results as JSON for visualization
+
+import util::Math;
+import lang::json::IO;
+
+// Export clone data as JSON for visualization (manual JSON building)
+public void exportClonesAsJSON(list[ClassClones] cloneClasses, loc outputFile) {
+    // Build a map: file path -> list of clone info
+    map[str, list[tuple[int classId, int startLine, int endLine, int lines, int cloneClassSize, str file]]] fileClones = ();
+    
+    // Collect all clones organized by file
+    for (ClassClones cc <- cloneClasses) {
+        int classId = indexOf(cloneClasses, cc);
+        
+        for (Clone c <- cc) {
+            str filePath = c.location.path;
+            int cloneLines = c.location.end.line - c.location.begin.line + 1;
+            
+            tuple[int classId, int startLine, int endLine, int lines, int cloneClassSize, str file] cloneInfo 
+                = <classId, c.location.begin.line, c.location.end.line, cloneLines, size(cc), c.location.file>;
+            
+            if (filePath in fileClones) {
+                fileClones[filePath] += [cloneInfo];
+            } else {
+                fileClones[filePath] = [cloneInfo];
+            }
+        }
+    }
+    
+    // Build JSON string manually
+    str json = "{\n  \"files\": [\n";
+    
+    list[str] filePaths = sort(toList(domain(fileClones)));
+    bool firstFile = true;
+    
+    for (str filePath <- filePaths) {
+        if (!firstFile) json += ",\n";
+        firstFile = false;
+        
+        list[tuple[int classId, int startLine, int endLine, int lines, int cloneClassSize, str file]] clones = fileClones[filePath];
+        
+        int totalCloneLines = 0;
+        for (c <- clones) {
+            totalCloneLines += c.lines;
+        }
+        
+        // Extract file name from path
+        list[str] pathParts = split("/", filePath);
+        str fileName = pathParts[-1];
+        
+        // Extract package/folder structure
+        str folder = "";
+        if (size(pathParts) > 1) {
+            folder = intercalate("/", pathParts[0..-1]);
+        }
+        
+        // Escape quotes in strings
+        str escapedPath = escape(filePath, ("\"": "\\\"", "\\": "\\\\"));
+        str escapedFile = escape(fileName, ("\"": "\\\"", "\\": "\\\\"));
+        str escapedFolder = escape(folder, ("\"": "\\\"", "\\": "\\\\"));
+        
+        json += "    {\n";
+        json += "      \"path\": \"<escapedPath>\",\n";
+        json += "      \"file\": \"<escapedFile>\",\n";
+        json += "      \"folder\": \"<escapedFolder>\",\n";
+        json += "      \"cloneCount\": <size(clones)>,\n";
+        json += "      \"cloneLines\": <totalCloneLines>,\n";
+        json += "      \"clones\": [\n";
+        
+        bool firstClone = true;
+        for (c <- clones) {
+            if (!firstClone) json += ",\n";
+            firstClone = false;
+            
+            str escapedCloneFile = escape(c.file, ("\"": "\\\"", "\\": "\\\\"));
+            json += "        {\n";
+            json += "          \"classId\": <c.classId>,\n";
+            json += "          \"startLine\": <c.startLine>,\n";
+            json += "          \"endLine\": <c.endLine>,\n";
+            json += "          \"lines\": <c.lines>,\n";
+            json += "          \"cloneClassSize\": <c.cloneClassSize>,\n";
+            json += "          \"file\": \"<escapedCloneFile>\"\n";
+            json += "        }";
+        }
+        
+        json += "\n      ]\n";
+        json += "    }";
+    }
+    
+    json += "\n  ],\n";
+    json += "  \"totalCloneClasses\": <size(cloneClasses)>\n";
+    json += "}\n";
+    
+    writeFile(outputFile, json);
+    println("Clone data exported as JSON to: <outputFile>");
+}
+
+// Updated test function that also exports JSON
+public void testCloneDetectionWithVisualization() {
+    loc testProject = |project://series2/SystemsForAnalysis/SmallJavaProject|;
+    int minCloneSize = 15;
+    
+    tuple[list[ClassClones], map[str, int]] result = detectTypeOneClones(testProject, minCloneSize);
+    list[ClassClones] cloneClasses = result<0>;
+    map[str, int] stats = result<1>;
+    
+    printStats(stats);
+    writeClonesToFile(cloneClasses, |project://series2/SystemsForAnalysis/SmallJavaProject/clone_results.txt|);
+    
+    // Export JSON for visualization
+    exportClonesAsJSON(cloneClasses, |project://series2/SystemsForAnalysis/SmallJavaProject/clone_data.json|);
+}
+
 /*
 -First step is to create data structures that define a clone and a class where we can store these clones.
 -The clone is a piece of code that we are analyzing, and it is defined as a tuple that contains the location
@@ -261,7 +376,7 @@ public void writeClonesToFile(list[ClassClones] cloneClasses, loc outputFile) {
 
 // Test the implementation
 public void testCloneDetection() {
-    loc testProject = |project://series2/SystemsForAnalysis/SmallJavaProject|;
+    loc testProject = |project://series2/SystemsForAnalysis/smallsql0.21_src|;
     int minCloneSize = 15;
     
     tuple[list[ClassClones], map[str, int]] result = detectTypeOneClones(testProject, minCloneSize);
